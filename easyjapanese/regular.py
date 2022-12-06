@@ -1,5 +1,6 @@
 import re
 import traceback
+import os
 
 from selenium import webdriver # webdriver 操作一般用
 from selenium.webdriver.chrome import service as fs # Chrome を driver として設定する用
@@ -58,10 +59,16 @@ class Regular():
         """Constructor.
         Define the attributes for start().
         """
-        pass
+        self.DRIVER_PATH = '../chromedriver'
+        self.service = fs.Service(executable_path=self.DRIVER_PATH)
+        self.options = Options()
+        self.options.add_argument('--window-size=1920,1200')
+        self.options.add_argument('--headless')
+        self.options.binary_location = '../headless-chromium'
 
 
     def start(self, url, url_or_article=True):
+        self.driver = webdriver.Chrome(options=self.options, service=self.service)
         """Open a browser, parse the JavaScript data and save it as HTML data.
         
         Parameters
@@ -71,11 +78,9 @@ class Regular():
         url_or_article : bool
             Whether you want to start retrieving URL or not.
         """
-        global driver 
-        
-        driver.get(url)
+        self.driver.get(url)
         print('Done starting up a new browser!')
-        html = driver.page_source.encode('utf-8')
+        html = self.driver.page_source.encode('utf-8')
         print('Done parsing the JavaScript data!')
         soup = BeautifulSoup(html, 'html.parser')
         print('Done reading the data as HTML!')
@@ -92,8 +97,7 @@ class Regular():
     def shutdown(self):
         """Shut down the driver.
         """
-        global driver
-        driver.quit()
+        self.driver.quit()
         print('All done shutdown(). Goodbye!')
 
 

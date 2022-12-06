@@ -47,12 +47,12 @@ class Complete():
         self.regular_urls = regular_urls
         self.regular_articles = regular_articles
         self.date = date
-
         self.client = storage.Client('EasyJapanese')
-        self.bucket = self.client.get_bucket('easyjapanese')
-        self.blob = self.bucket.blob('easyjapanese/data/data_pool_test.csv')
-        content = self.blob.download_as_bytes()
-        self.df_old = pd.read_csv(BytesIO(content))
+        self.bucket = self.client.bucket('easyjapanese')
+        self.blob = self.bucket.blob('/easyjapanese/data/data_pool_test.csv')
+        self.content = self.blob.download_as_bytes()
+        self.df_old = pd.read_csv(BytesIO(self.content))
+        
 
     def make_df(self):
         """Create the dataframe from the retrieved data.
@@ -81,17 +81,29 @@ class Complete():
         """Pile up the created dataframe on the existing dataframe and save it.
         """
         try:
-            self.df_piled = pd.concat([self.df, self.df_old])\
-                            .drop_duplicates()
+            self.df_piled = pd.concat([self.df, self.df_old])
             self.df_piled['Date'] = pd.to_datetime(self.df_piled['Date'])
+            self.df_piled = self.df_piled.drop_duplicates()
             self.blob.upload_from_string(self.df_piled.to_csv(index=False))
         except:
             print('An expected error has occurred during concat().')
             traceback.print_exc()
             self.df_piled = 'Unexpected'
+        return self.df_piled
     
 
     
+    # def input_length_test(self):
+    #     """(Soon to be deleted) Check if the retrieved datas have unequal shape.
+    #     """
+    #     try:
+    #         if ~(
+    #             len(self.easy_urls) == len(self.easy_articles)\
+    #             == len(self.regular_urls) == len(self.regular_articles)
+    #         ):
+    #             raise LengthError('An unexpected error has occured with some or all of the four inputs.')
+    #     except LengthError:
+    #         print(traceback.print_exc())
 
     def get_date(self):
         """Obtain the date of newly retrieded data.
@@ -110,3 +122,10 @@ class Complete():
                 new_year, new_date_raw.month, new_date_raw.day
                 )
         return self.date_new
+
+
+
+# class LengthError(Exception):
+#     """This error notifies the unequal length of the inputs; URLs and articles.
+#     """
+#     pass

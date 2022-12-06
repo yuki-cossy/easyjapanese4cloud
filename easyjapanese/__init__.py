@@ -33,7 +33,7 @@ if sys.version_info.major < 3:
 
 # I don't know what to include. Should I include the other libraries (e.g. sys, bs4.BeautifulSoup, ...)
 __all__ = ['EasyJapanese', 'Easy', 'Regular', 'Complete']
-# __version__ = '0.1.3'
+__version__ = '0.1.4'
 
 
 
@@ -57,6 +57,7 @@ def EasyJapanese():
         easy_urls.append(easy_url)
     print('Done retrieving the URLs!')
     print('All done with easy_urls! Great job!')
+    e.shutdown()
 
     # easy_articles
     for url in tqdm(easy_urls):
@@ -68,11 +69,12 @@ def EasyJapanese():
         easy_articles.append(easy_article)
     print('Done retrieving the articles!')
     print('All done with easy_articles! Great job!')
+    e.shutdown()
 
     # new_date
     new_date = e.date
 
-    r = Regular()
+    r = Regular(e.DRIVER_PATH)
     # regular_urls
     for url in tqdm(easy_urls):
         r.start(url, url_or_article=True)
@@ -83,6 +85,7 @@ def EasyJapanese():
         regular_urls.append(reg_url)
     print('Done retrieving the URLs!')
     print('All done with regular_urls! Great job!')
+    r.shutdown()
 
     # regular_articles
     for url in tqdm(regular_urls):
@@ -94,7 +97,6 @@ def EasyJapanese():
         regular_articles.append(reg_article)
     print('Done retrieving the articles!')
     print('All done with regular_articles! Great job!')
-    
     r.shutdown()
 
 
@@ -105,4 +107,5 @@ def EasyJapanese():
             new_date
             )
     c.make_df()
-    c.concat()
+    df_new = c.concat()
+    return df_new
